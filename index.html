@@ -326,12 +326,34 @@
             const overlay = document.getElementById('start-overlay');
             const audio = document.getElementById('bg-music');
             
-            overlay.addEventListener('click', () => {
-                overlay.style.opacity = 0;
-                setTimeout(() => overlay.remove(), 500);
-                initTouchControls(); 
-                audio.play().catch(e => { console.log("Audio Error:", e); });
-            });
+            const startAudio = () => {
+    // ẩn overlay
+    overlay.style.opacity = 0;
+    setTimeout(() => overlay.remove(), 500);
+
+    initTouchControls();
+
+    // phát nhạc (được browser cho phép)
+    audio.volume = 0.7;
+    audio.currentTime = 0;
+
+    audio.play()
+        .then(() => {
+            console.log("🎵 Audio started");
+        })
+        .catch(err => {
+            console.warn("❌ Audio blocked:", err);
+        });
+
+    // tránh bị gọi lại
+    overlay.removeEventListener('click', startAudio);
+    overlay.removeEventListener('touchstart', startAudio);
+};
+
+// desktop + mobile
+overlay.addEventListener('click', startAudio, { once: true });
+overlay.addEventListener('touchstart', startAudio, { once: true });
+
 
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
